@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppHeader,
@@ -27,8 +27,17 @@ import { fetchUser } from '../../services/slices/authSlice';
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const background = location.state?.background;
   const dispatch = useDispatch();
+
+  const background = useMemo(() => {
+    if (location.state?.background) return location.state.background;
+
+    if (location.pathname.match(/^\/profile\/orders\/\d+$/)) {
+      return { ...location, pathname: '/profile/orders' };
+    }
+
+    return undefined;
+  }, [location]);
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -91,7 +100,14 @@ const App = () => {
         />
         <Route path='/ingredients/:id' element={<IngredientDetails />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
-        <Route path='/profile/orders/:number' element={<OrderInfo />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
@@ -116,8 +132,13 @@ const App = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title={'Детали заказа'} onClose={() => navigate(-1)}>
-                <OrderInfo />
+              <Modal
+                title={'Детали заказа'}
+                onClose={() => navigate('/profile/orders')}
+              >
+                <ProtectedRoute>
+                  <OrderInfo />
+                </ProtectedRoute>
               </Modal>
             }
           />

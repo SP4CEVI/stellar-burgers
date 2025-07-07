@@ -21,10 +21,23 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     if (isLoading) return;
 
+    const isOrderDetailPage = location.pathname.includes('/orders/');
     const redirectPath = location.state?.from || '/';
 
     if (!onlyForUnauthenticated && !user) {
-      navigate('/login', { state: { from: location }, replace: true });
+      navigate('/login', {
+        state: {
+          from: isOrderDetailPage
+            ? {
+                ...location,
+                state: {
+                  background: { ...location, pathname: '/profile/orders' }
+                }
+              }
+            : location
+        },
+        replace: true
+      });
     } else if (onlyForUnauthenticated && user) {
       navigate(redirectPath, { replace: true });
     }
