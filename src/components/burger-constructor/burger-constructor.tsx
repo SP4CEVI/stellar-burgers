@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useEffect } from 'react';
 import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -23,6 +23,15 @@ export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(
+    () => () => {
+      if (currentOrder) {
+        dispatch(clearCurrentOrder());
+      }
+    },
+    [dispatch, currentOrder]
+  );
 
   const onOrderClick = () => {
     if (!bun || isLoading) return;
